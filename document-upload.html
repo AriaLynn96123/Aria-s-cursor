@@ -1,0 +1,895 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medibank Knowledge Base - Document Upload</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --primary-color: #007AFF;
+            --primary-hover: #0056b3;
+            --secondary-color: #5856D6;
+            --success-color: #34C759;
+            --warning-color: #FF9500;
+            --error-color: #FF3B30;
+            --text-primary: #000000;
+            --text-secondary: #6e6e73;
+            --background-primary: #ffffff;
+            --background-secondary: #f5f5f7;
+            --border-color: #e5e5e7;
+            --card-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* MacOS Status Bar */
+        .macos-status-bar {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border-color);
+            height: 28px;
+            display: flex;
+            align-items: center;
+            padding: 0 12px;
+            font-size: 13px;
+            color: var(--text-primary);
+        }
+
+        .macos-status-bar .left {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .macos-status-bar .right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        /* App Navigation */
+        .app-nav {
+            background: var(--background-primary);
+            border-bottom: 1px solid var(--border-color);
+            padding: 12px 24px;
+            display: flex;
+            align-items: center;
+            gap: 24px;
+        }
+
+        .app-nav .logo {
+            font-weight: 600;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .app-nav .nav-items {
+            display: flex;
+            gap: 24px;
+        }
+
+        .nav-item {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 14px;
+            padding: 6px 12px;
+            border-radius: 6px;
+            transition: all 0.2s;
+        }
+
+        .nav-item:hover {
+            background: var(--background-secondary);
+            color: var(--text-primary);
+        }
+
+        .nav-item.active {
+            background: var(--background-secondary);
+            color: var(--primary-color);
+            font-weight: 500;
+        }
+
+        /* Main Content */
+        .main-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 32px;
+        }
+
+        /* Document Upload Area */
+        .upload-area {
+            border: 2px dashed var(--border-color);
+            border-radius: 12px;
+            padding: 48px;
+            text-align: center;
+            background: var(--background-primary);
+            transition: all 0.2s;
+        }
+
+        .upload-area:hover {
+            border-color: var(--primary-color);
+            background: rgba(0, 122, 255, 0.02);
+        }
+
+        .upload-icon {
+            font-size: 48px;
+            color: var(--primary-color);
+            margin-bottom: 16px;
+        }
+
+        /* Progress Indicators */
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: var(--background-secondary);
+            border-radius: 3px;
+            overflow: hidden;
+            margin: 8px 0;
+        }
+
+        .progress-bar .fill {
+            height: 100%;
+            background: var(--primary-color);
+            transition: width 0.3s ease;
+        }
+
+        /* Document Processing */
+        .processing-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 16px;
+            margin-top: 24px;
+        }
+
+        .option-card {
+            background: var(--background-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .option-card:hover {
+            border-color: var(--primary-color);
+            transform: translateY(-2px);
+        }
+
+        .option-card.selected {
+            background: rgba(0, 122, 255, 0.05);
+            border-color: var(--primary-color);
+        }
+
+        /* Document Preview */
+        .document-preview {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-top: 24px;
+        }
+
+        .preview-panel {
+            background: var(--background-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 24px;
+            height: 600px;
+            overflow-y: auto;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-hover);
+        }
+
+        .btn-secondary {
+            background: var(--background-secondary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            background: var(--background-primary);
+            border-color: var(--text-secondary);
+        }
+
+        /* Status Indicators */
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .status-success {
+            background: rgba(52, 199, 89, 0.1);
+            color: var(--success-color);
+        }
+
+        .status-warning {
+            background: rgba(255, 149, 0, 0.1);
+            color: var(--warning-color);
+        }
+
+        .status-error {
+            background: rgba(255, 59, 48, 0.1);
+            color: var(--error-color);
+        }
+
+        /* Document List */
+        .document-list {
+            margin-top: 24px;
+        }
+
+        .document-item {
+            display: flex;
+            align-items: center;
+            padding: 16px;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            margin-bottom: 12px;
+            background: var(--background-primary);
+        }
+
+        .document-icon {
+            width: 40px;
+            height: 40px;
+            background: rgba(0, 122, 255, 0.05);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 16px;
+        }
+
+        .document-info {
+            flex: 1;
+        }
+
+        .document-title {
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+
+        .document-meta {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        /* Modals */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(5px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: var(--background-primary);
+            border-radius: 16px;
+            padding: 24px;
+            width: 90%;
+            max-width: 600px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Animations */
+        @keyframes slideIn {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .animate-slide-in {
+            animation: slideIn 0.3s ease forwards;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- MacOS Status Bar -->
+    <div class="macos-status-bar">
+        <div class="left">
+            <span><i class="fab fa-apple"></i></span>
+            <span>Medibank Knowledge Base</span>
+            <span>File</span>
+            <span>Edit</span>
+            <span>View</span>
+            <span>Help</span>
+        </div>
+        <div class="right">
+            <span><i class="fas fa-wifi"></i></span>
+            <span><i class="fas fa-battery-full"></i></span>
+            <span id="clock">12:00 PM</span>
+        </div>
+    </div>
+
+    <!-- App Navigation -->
+    <nav class="app-nav">
+        <div class="logo">
+            <i class="fas fa-book-medical"></i>
+            <span>Medibank KB</span>
+        </div>
+        <div class="nav-items">
+            <a href="#" class="nav-item active">Knowledge Base</a>
+            <a href="#" class="nav-item">Documents</a>
+            <a href="#" class="nav-item">Analytics</a>
+            <a href="#" class="nav-item">Settings</a>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="flex justify-between items-center mb-8">
+            <h1 class="text-2xl font-semibold">Marketing Knowledge Base</h1>
+            <button class="btn btn-primary" onclick="showUploadModal()">
+                <i class="fas fa-upload"></i>
+                Upload Document
+            </button>
+        </div>
+
+        <!-- Empty State -->
+        <div id="emptyState" class="upload-area">
+            <i class="fas fa-cloud-upload-alt upload-icon"></i>
+            <h2 class="text-xl font-semibold mb-2">No Documents Yet</h2>
+            <p class="text-gray-600 mb-4">Start by uploading your first document to the knowledge base</p>
+            <button class="btn btn-primary" onclick="showUploadModal()">
+                <i class="fas fa-plus"></i>
+                Upload Document
+            </button>
+        </div>
+
+        <!-- Document List -->
+        <div id="documentList" class="document-list" style="display: none;">
+            <!-- Document items will be added here dynamically -->
+        </div>
+    </main>
+
+    <!-- Upload Modal -->
+    <div id="uploadModal" class="modal">
+        <div class="modal-content animate-slide-in">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-xl font-semibold">Upload Document</h2>
+                <button onclick="closeUploadModal()" class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="upload-area mb-6">
+                <i class="fas fa-cloud-upload-alt upload-icon"></i>
+                <p class="text-gray-600 mb-2">Drag documents here or upload from local files</p>
+                <p class="text-sm text-gray-500">Maximum Size: 500MB</p>
+                <input type="file" id="fileInput" class="hidden" onchange="handleFileUpload(event)">
+                <button class="btn btn-secondary mt-4" onclick="document.getElementById('fileInput').click()">
+                    <i class="fas fa-folder-open"></i>
+                    Choose File
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Processing Modal -->
+    <div id="processingModal" class="modal">
+        <div class="modal-content animate-slide-in">
+            <h2 class="text-xl font-semibold mb-6">Document Processing</h2>
+            <div class="processing-steps">
+                <div class="step mb-4">
+                    <div class="flex justify-between items-center mb-2">
+                        <span>Uploading</span>
+                        <span id="uploadStatus" class="status-badge status-warning">
+                            <i class="fas fa-spinner fa-spin"></i>
+                            Uploading
+                        </span>
+                    </div>
+                    <div class="progress-bar">
+                        <div id="uploadProgress" class="fill" style="width: 0%"></div>
+                    </div>
+                </div>
+                <div class="step mb-4">
+                    <div class="flex justify-between items-center mb-2">
+                        <span>Pre-processing</span>
+                        <span id="preprocessStatus" class="status-badge status-warning" style="display: none;">
+                            <i class="fas fa-spinner fa-spin"></i>
+                            Processing
+                        </span>
+                    </div>
+                    <div class="progress-bar">
+                        <div id="preprocessProgress" class="fill" style="width: 0%"></div>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="flex justify-between items-center mb-2">
+                        <span>Knowledge Slicing</span>
+                        <span id="slicingStatus" class="status-badge status-warning" style="display: none;">
+                            <i class="fas fa-spinner fa-spin"></i>
+                            Processing
+                        </span>
+                    </div>
+                    <div class="progress-bar">
+                        <div id="slicingProgress" class="fill" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="flex justify-end mt-6">
+                <button class="btn btn-secondary" onclick="backToMain()">
+                    <i class="fas fa-arrow-left"></i>
+                    Back to Main
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pre-processing Modal -->
+    <div id="preprocessingModal" class="modal">
+        <div class="modal-content animate-slide-in">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-xl font-semibold">Document Pre-processing</h2>
+                <button onclick="closePreprocessingModal()" class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <p class="text-gray-600 mb-6">Would you like to pre-process this document?</p>
+            <div class="flex gap-4 mb-6">
+                <button class="btn btn-primary flex-1" onclick="showPreprocessingOptions()">
+                    <i class="fas fa-check"></i>
+                    Yes
+                </button>
+                <button class="btn btn-secondary flex-1" onclick="skipPreprocessing()">
+                    <i class="fas fa-times"></i>
+                    No
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pre-processing Options Modal -->
+    <div id="preprocessingOptionsModal" class="modal">
+        <div class="modal-content animate-slide-in">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-xl font-semibold">Select Pre-processing Options</h2>
+                <button onclick="closePreprocessingOptionsModal()" class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="processing-options">
+                <div class="option-card" onclick="toggleOption(this)" data-option="remove-redundant">
+                    <div class="flex items-center gap-3 mb-2">
+                        <i class="fas fa-broom text-blue-500"></i>
+                        <h3 class="font-medium">Remove Redundant Information</h3>
+                    </div>
+                    <p class="text-sm text-gray-600">Remove table of contents and punctuation marks</p>
+                </div>
+                <div class="option-card" onclick="toggleOption(this)" data-option="text-rewrite">
+                    <div class="flex items-center gap-3 mb-2">
+                        <i class="fas fa-pen text-blue-500"></i>
+                        <h3 class="font-medium">Text Rewrite</h3>
+                    </div>
+                    <p class="text-sm text-gray-600">Add bilingual assistance, hyperlinks and annotations</p>
+                </div>
+                <div class="option-card" onclick="toggleOption(this)" data-option="image-convert">
+                    <div class="flex items-center gap-3 mb-2">
+                        <i class="fas fa-image text-blue-500"></i>
+                        <h3 class="font-medium">Image Conversion</h3>
+                    </div>
+                    <p class="text-sm text-gray-600">Convert images to text (Note: AI accuracy may vary)</p>
+                </div>
+                <div class="option-card" onclick="toggleOption(this)" data-option="table-convert">
+                    <div class="flex items-center gap-3 mb-2">
+                        <i class="fas fa-table text-blue-500"></i>
+                        <h3 class="font-medium">Table Conversion</h3>
+                    </div>
+                    <p class="text-sm text-gray-600">Convert 2D tables to text format</p>
+                </div>
+            </div>
+            <div class="flex justify-end gap-4 mt-6">
+                <button class="btn btn-secondary" onclick="backToPreprocessing()">
+                    <i class="fas fa-arrow-left"></i>
+                    Back
+                </button>
+                <button class="btn btn-primary" onclick="startPreprocessing()">
+                    <i class="fas fa-play"></i>
+                    Start Processing
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pre-processing Preview Modal -->
+    <div id="preprocessingPreviewModal" class="modal">
+        <div class="modal-content animate-slide-in" style="max-width: 1000px;">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-xl font-semibold">Pre-processing Preview</h2>
+                <button onclick="closePreprocessingPreviewModal()" class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="document-preview">
+                <div class="preview-panel">
+                    <h3 class="font-medium mb-4">Original Document</h3>
+                    <div class="original-content">
+                        <!-- Original content will be added here -->
+                    </div>
+                </div>
+                <div class="preview-panel">
+                    <h3 class="font-medium mb-4">Processed Document</h3>
+                    <div class="processed-content">
+                        <!-- Processed content will be added here -->
+                    </div>
+                </div>
+            </div>
+            <div class="flex justify-end gap-4 mt-6">
+                <button class="btn btn-secondary" onclick="restartPreprocessing()">
+                    <i class="fas fa-redo"></i>
+                    Reprocess
+                </button>
+                <button class="btn btn-primary" onclick="proceedToSlicing()">
+                    <i class="fas fa-check"></i>
+                    Confirm & Continue
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Knowledge Slicing Modal -->
+    <div id="slicingModal" class="modal">
+        <div class="modal-content animate-slide-in">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-xl font-semibold">Knowledge Slicing Options</h2>
+                <button onclick="closeSlicingModal()" class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="mb-6">
+                <h3 class="font-medium mb-3">Slicing Method</h3>
+                <div class="grid gap-4">
+                    <div class="option-card" onclick="selectSlicingMethod(this)" data-method="fixed-length">
+                        <div class="flex items-center gap-3">
+                            <i class="fas fa-ruler text-blue-500"></i>
+                            <div>
+                                <h4 class="font-medium">Fixed Length</h4>
+                                <p class="text-sm text-gray-600">Split by character count (e.g., 512 or 256)</p>
+                            </div>
+                        </div>
+                        <div class="mt-3 hidden slice-options">
+                            <input type="number" class="w-full p-2 border rounded" min="0" max="1000" placeholder="Enter character count">
+                        </div>
+                    </div>
+                    <div class="option-card" onclick="selectSlicingMethod(this)" data-method="separator">
+                        <div class="flex items-center gap-3">
+                            <i class="fas fa-cut text-blue-500"></i>
+                            <div>
+                                <h4 class="font-medium">Separator Based</h4>
+                                <p class="text-sm text-gray-600">Split by punctuation marks (。，！etc.)</p>
+                            </div>
+                        </div>
+                        <div class="mt-3 hidden slice-options">
+                            <input type="text" class="w-full p-2 border rounded" placeholder="Enter separators">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="mb-6">
+                <h3 class="font-medium mb-3">Additional Options</h3>
+                <div class="flex flex-col gap-4">
+                    <label class="flex items-center gap-2">
+                        <input type="checkbox" class="form-checkbox">
+                        <span>Use overlapping blocks</span>
+                    </label>
+                    <div>
+                        <label class="block mb-2">Similarity Matching (Top-k)</label>
+                        <input type="range" min="1" max="10" value="5" class="w-full">
+                        <div class="flex justify-between text-sm text-gray-600">
+                            <span>1</span>
+                            <span>5</span>
+                            <span>10</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="flex justify-end gap-4">
+                <button class="btn btn-secondary" onclick="backToPreprocessing()">
+                    <i class="fas fa-arrow-left"></i>
+                    Back
+                </button>
+                <button class="btn btn-primary" onclick="startSlicing()">
+                    <i class="fas fa-play"></i>
+                    Start Slicing
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slicing Preview Modal -->
+    <div id="slicingPreviewModal" class="modal">
+        <div class="modal-content animate-slide-in" style="max-width: 1000px;">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-xl font-semibold">Knowledge Slicing Preview</h2>
+                <button onclick="closeSlicingPreviewModal()" class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="document-preview">
+                <div class="preview-panel">
+                    <h3 class="font-medium mb-4">Original Document</h3>
+                    <div class="original-content">
+                        <!-- Original content will be added here -->
+                    </div>
+                </div>
+                <div class="preview-panel">
+                    <h3 class="font-medium mb-4">Sliced Document</h3>
+                    <div class="sliced-content">
+                        <!-- Sliced content will be added here -->
+                    </div>
+                </div>
+            </div>
+            <div class="flex justify-end gap-4 mt-6">
+                <button class="btn btn-secondary" onclick="restartSlicing()">
+                    <i class="fas fa-redo"></i>
+                    Reslice
+                </button>
+                <button class="btn btn-primary" onclick="finishProcessing()">
+                    <i class="fas fa-check"></i>
+                    Finish
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Document List Template -->
+    <template id="documentItemTemplate">
+        <div class="document-item">
+            <div class="document-icon">
+                <i class="fas fa-file-alt text-blue-500"></i>
+            </div>
+            <div class="document-info">
+                <div class="document-title"></div>
+                <div class="document-meta">
+                    <span class="mr-4 created-date"></span>
+                    <span class="mr-4 created-by"></span>
+                    <span class="status-badge status-success">
+                        <i class="fas fa-check"></i>
+                        Added to Knowledge Base
+                    </span>
+                </div>
+            </div>
+            <div class="document-actions">
+                <button class="btn btn-secondary btn-sm ml-4" onclick="viewDocument(this)">
+                    <i class="fas fa-eye"></i>
+                    View
+                </button>
+            </div>
+        </div>
+    </template>
+
+    <script>
+        // Update clock
+        function updateClock() {
+            const now = new Date();
+            document.getElementById('clock').textContent = now.toLocaleTimeString('en-US', {
+                hour: 'numeric',
+                minute: '2-digit'
+            });
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        // Modal functions
+        function showUploadModal() {
+            document.getElementById('uploadModal').style.display = 'flex';
+        }
+
+        function closeUploadModal() {
+            document.getElementById('uploadModal').style.display = 'none';
+        }
+
+        function showProcessingModal() {
+            document.getElementById('uploadModal').style.display = 'none';
+            document.getElementById('processingModal').style.display = 'flex';
+        }
+
+        // Pre-processing functions
+        function showPreprocessingModal() {
+            document.getElementById('processingModal').style.display = 'none';
+            document.getElementById('preprocessingModal').style.display = 'flex';
+        }
+
+        function closePreprocessingModal() {
+            document.getElementById('preprocessingModal').style.display = 'none';
+        }
+
+        function showPreprocessingOptions() {
+            document.getElementById('preprocessingModal').style.display = 'none';
+            document.getElementById('preprocessingOptionsModal').style.display = 'flex';
+        }
+
+        function closePreprocessingOptionsModal() {
+            document.getElementById('preprocessingOptionsModal').style.display = 'none';
+        }
+
+        function toggleOption(element) {
+            element.classList.toggle('selected');
+        }
+
+        function startPreprocessing() {
+            document.getElementById('preprocessingOptionsModal').style.display = 'none';
+            // Simulate processing
+            setTimeout(() => {
+                document.getElementById('preprocessingPreviewModal').style.display = 'flex';
+            }, 2000);
+        }
+
+        function closePreprocessingPreviewModal() {
+            document.getElementById('preprocessingPreviewModal').style.display = 'none';
+        }
+
+        // Knowledge Slicing functions
+        function showSlicingModal() {
+            document.getElementById('preprocessingPreviewModal').style.display = 'none';
+            document.getElementById('slicingModal').style.display = 'flex';
+        }
+
+        function closeSlicingModal() {
+            document.getElementById('slicingModal').style.display = 'none';
+        }
+
+        function selectSlicingMethod(element) {
+            document.querySelectorAll('.option-card').forEach(card => {
+                card.classList.remove('selected');
+                card.querySelector('.slice-options').style.display = 'none';
+            });
+            element.classList.add('selected');
+            element.querySelector('.slice-options').style.display = 'block';
+        }
+
+        function startSlicing() {
+            document.getElementById('slicingModal').style.display = 'none';
+            // Simulate processing
+            setTimeout(() => {
+                document.getElementById('slicingPreviewModal').style.display = 'flex';
+            }, 2000);
+        }
+
+        function closeSlicingPreviewModal() {
+            document.getElementById('slicingPreviewModal').style.display = 'none';
+        }
+
+        function finishProcessing() {
+            const currentFile = document.getElementById('fileInput').files[0];
+            document.getElementById('slicingPreviewModal').style.display = 'none';
+            
+            if (currentFile) {
+                addDocumentToList(currentFile.name);
+            } else {
+                addDocumentToList('Sample Document.pdf');
+            }
+        }
+
+        // Navigation functions
+        function backToPreprocessing() {
+            document.getElementById('preprocessingOptionsModal').style.display = 'none';
+            document.getElementById('slicingModal').style.display = 'none';
+            document.getElementById('preprocessingModal').style.display = 'flex';
+        }
+
+        function skipPreprocessing() {
+            document.getElementById('preprocessingModal').style.display = 'none';
+            showSlicingModal();
+        }
+
+        function proceedToSlicing() {
+            document.getElementById('preprocessingPreviewModal').style.display = 'none';
+            showSlicingModal();
+        }
+
+        // File upload handling
+        function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            if (file.size > 500 * 1024 * 1024) {
+                alert('File size exceeds 500MB limit. Please choose a smaller file.');
+                return;
+            }
+
+            showProcessingModal();
+            simulateUploadProgress(file);
+        }
+
+        function simulateUploadProgress(file) {
+            let progress = 0;
+            const uploadStatus = document.getElementById('uploadStatus');
+            const uploadProgress = document.getElementById('uploadProgress');
+            
+            const interval = setInterval(() => {
+                progress += 5;
+                uploadProgress.style.width = `${progress}%`;
+                
+                if (progress >= 100) {
+                    clearInterval(interval);
+                    uploadStatus.className = 'status-badge status-success';
+                    uploadStatus.innerHTML = '<i class="fas fa-check"></i> Complete';
+                    setTimeout(() => {
+                        showPreprocessingModal();
+                    }, 1000);
+                }
+            }, 100);
+        }
+
+        function addDocumentToList(filename) {
+            const documentList = document.getElementById('documentList');
+            const template = document.getElementById('documentItemTemplate');
+            const clone = template.content.cloneNode(true);
+            
+            // Set document details
+            clone.querySelector('.document-title').textContent = filename;
+            clone.querySelector('.created-date').textContent = `Created: ${new Date().toLocaleDateString()}`;
+            clone.querySelector('.created-by').textContent = 'Created by: John Doe';
+            
+            documentList.appendChild(clone);
+            
+            // Show document list and hide empty state
+            document.getElementById('emptyState').style.display = 'none';
+            documentList.style.display = 'block';
+        }
+
+        function backToMain() {
+            // Hide all modals
+            document.querySelectorAll('.modal').forEach(modal => {
+                modal.style.display = 'none';
+            });
+            
+            // Reset progress bars
+            document.getElementById('uploadProgress').style.width = '0%';
+            document.getElementById('preprocessProgress').style.width = '0%';
+            document.getElementById('slicingProgress').style.width = '0%';
+            
+            // Reset status badges
+            document.getElementById('uploadStatus').className = 'status-badge status-warning';
+            document.getElementById('uploadStatus').innerHTML = '<i class="fas fa-spinner fa-spin"></i> Uploading';
+        }
+
+        function viewDocument(button) {
+            const documentItem = button.closest('.document-item');
+            const filename = documentItem.querySelector('.document-title').textContent;
+            // 这里可以添加查看文档的具体逻辑
+            alert(`Viewing document: ${filename}`);
+        }
+    </script>
+</body>
+</html> 

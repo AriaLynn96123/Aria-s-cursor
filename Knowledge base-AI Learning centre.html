@@ -1,0 +1,1021 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medibank Knowledge Base - AI Learning Centre</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary-color: #007AFF;
+            --primary-hover: #0056b3;
+            --secondary-color: #5856D6;
+            --success-color: #34C759;
+            --warning-color: #FF9500;
+            --error-color: #FF3B30;
+            --text-primary: #000000;
+            --text-secondary: #6e6e73;
+            --background-primary: #ffffff;
+            --background-secondary: #f5f5f7;
+            --border-color: #e5e5e7;
+            --card-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* MacOS Status Bar */
+        .macos-status-bar {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border-color);
+            height: 28px;
+            display: flex;
+            align-items: center;
+            padding: 0 12px;
+            font-size: 13px;
+            color: var(--text-primary);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+        }
+
+        /* Navigation Styles */
+        .nav-level-1 {
+            background: var(--background-primary);
+            border-bottom: 1px solid var(--border-color);
+            padding: 12px 24px;
+            position: fixed;
+            top: 28px;
+            left: 0;
+            right: 0;
+            z-index: 999;
+        }
+
+        .nav-level-2 {
+            background: var(--background-secondary);
+            padding: 12px 24px;
+            position: fixed;
+            top: 84px;
+            left: 0;
+            right: 0;
+            z-index: 998;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .nav-level-3 {
+            background: var(--background-primary);
+            padding: 12px 24px;
+            position: fixed;
+            top: 140px;
+            left: 0;
+            right: 0;
+            z-index: 997;
+            border-bottom: 1px solid var(--border-color);
+            display: none;
+        }
+
+        .nav-level-4 {
+            background: var(--background-secondary);
+            padding: 12px 24px;
+            position: fixed;
+            top: 196px;
+            left: 0;
+            right: 0;
+            z-index: 996;
+            border-bottom: 1px solid var(--border-color);
+            display: none;
+        }
+
+        .nav-container {
+            max-width: 1440px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* Main Content */
+        .main-content {
+            max-width: 1440px;
+            margin: 0 auto;
+            padding: 252px 32px 32px;
+            min-height: 100vh;
+            background: var(--background-secondary);
+        }
+
+        /* Error Report List */
+        .error-list {
+            background: var(--background-primary);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: var(--card-shadow);
+        }
+
+        .error-list-header {
+            background: var(--background-secondary);
+            padding: 16px 24px;
+            border-bottom: 1px solid var(--border-color);
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr 1fr 1fr;
+            gap: 16px;
+            font-weight: 500;
+        }
+
+        .error-list-item {
+            padding: 16px 24px;
+            border-bottom: 1px solid var(--border-color);
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr 1fr 1fr;
+            gap: 16px;
+            align-items: center;
+        }
+
+        .error-list-item:hover {
+            background: var(--background-secondary);
+        }
+
+        /* Status Badge */
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+            text-align: center;
+        }
+
+        .status-unread {
+            background: rgba(255, 149, 0, 0.1);
+            color: var(--warning-color);
+        }
+
+        .status-read {
+            background: rgba(88, 86, 214, 0.1);
+            color: var(--secondary-color);
+        }
+
+        .status-pending {
+            background: rgba(0, 122, 255, 0.1);
+            color: var(--primary-color);
+        }
+
+        .status-resolved {
+            background: rgba(52, 199, 89, 0.1);
+            color: var(--success-color);
+        }
+
+        /* AI Analysis Section */
+        .ai-analysis {
+            background: var(--background-primary);
+            border-radius: 12px;
+            padding: 24px;
+            margin-top: 24px;
+            box-shadow: var(--card-shadow);
+        }
+
+        .chart-container {
+            height: 300px;
+            margin: 24px 0;
+        }
+
+        /* Animations */
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        .ai-icon {
+            animation: pulse 2s infinite;
+            color: var(--primary-color);
+        }
+
+        /* Selection Checkbox */
+        .error-select {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 2px solid var(--border-color);
+            appearance: none;
+            cursor: pointer;
+            margin-right: 12px;
+            display: none;
+        }
+
+        .error-select:checked {
+            background: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+        /* Modal */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(5px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1001;
+        }
+
+        .modal-content {
+            background: var(--background-primary);
+            border-radius: 16px;
+            padding: 24px;
+            width: 90%;
+            max-width: 600px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Form Elements */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 14px;
+            resize: vertical;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        .hint {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
+
+        .ai-analysis-poster {
+            background: linear-gradient(135deg, #f0f9ff 0%, #e6f3ff 100%);
+            border-radius: 16px;
+            padding: 48px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 24px;
+        }
+
+        .poster-content {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .poster-icon {
+            margin-bottom: 24px;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .start-analysis-btn {
+            background: var(--primary-color);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .start-analysis-btn:hover {
+            background: var(--primary-hover);
+            transform: translateY(-2px);
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+
+        .history-item {
+            background: white;
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .history-item:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .rec-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .rec-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        /* 在现有样式的末尾添加 */
+        .trend-bar {
+            width: 40px;
+            background: #007AFF;
+            transition: height 0.3s ease;
+            border-radius: 4px 4px 0 0;
+            position: relative;
+            text-align: center;
+        }
+
+        .trend-bar:hover {
+            opacity: 0.8;
+        }
+
+        .trend-bar::before {
+            content: attr(title);
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 12px;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+
+        .trend-bar:hover::before {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <!-- MacOS Status Bar -->
+    <div class="macos-status-bar">
+        <div class="left">
+            <span><i class="fab fa-apple"></i></span>
+            <span>Medibank Knowledge Base</span>
+            <span>File</span>
+            <span>Edit</span>
+            <span>View</span>
+            <span>Help</span>
+        </div>
+        <div class="right">
+            <span><i class="fas fa-wifi"></i></span>
+            <span><i class="fas fa-battery-full"></i></span>
+            <span id="clock">12:00 PM</span>
+        </div>
+    </div>
+
+    <!-- Navigation Level 1 -->
+    <nav class="nav-level-1">
+        <div class="nav-container">
+            <div class="flex items-center gap-8">
+                <div class="flex items-center gap-2 text-blue-500 font-semibold">
+                    <i class="fas fa-book-medical text-lg"></i>
+                    <span>Medibank KB</span>
+                </div>
+                <div class="flex gap-6">
+                    <a href="#" class="text-gray-600 hover:text-gray-900">Knowledge Base</a>
+                    <a href="#" class="text-gray-600 hover:text-gray-900">Analytics</a>
+                    <a href="#" class="text-blue-500 font-medium">AI Learning Centre</a>
+                    <a href="#" class="text-gray-600 hover:text-gray-900">Settings</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Navigation Level 2 -->
+    <nav class="nav-level-2">
+        <div class="nav-container">
+            <div class="flex gap-6">
+                <button class="text-gray-600 hover:text-gray-900" onclick="showHumanReported(this)">Human Reported Errors</button>
+                <button class="text-gray-600 hover:text-gray-900" onclick="showAIReported(this)">AI Reported Errors</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Navigation Level 3 -->
+    <nav class="nav-level-3" id="humanReportedNav">
+        <div class="nav-container">
+            <div class="flex gap-6">
+                <button class="text-gray-600 hover:text-gray-900" onclick="toggleManageReports(this)">Manage Reports</button>
+                <button class="text-gray-600 hover:text-gray-900" onclick="showAIAnalyze(this)">AI Analyze Report</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Navigation Level 4 (Management) -->
+    <nav class="nav-level-4" id="manageNav">
+        <div class="nav-container">
+            <div class="flex gap-4">
+                <button class="btn btn-secondary" onclick="selectAll()">
+                    <i class="fas fa-check-square"></i>
+                    Select All
+                </button>
+                <button class="btn btn-secondary" onclick="deselectAll()">
+                    <i class="fas fa-square"></i>
+                    Deselect All
+                </button>
+            </div>
+            <button class="btn btn-primary" onclick="showSendModal()">
+                <i class="fas fa-paper-plane"></i>
+                Send
+            </button>
+        </div>
+    </nav>
+
+    <!-- Navigation Level 4 (AI Analysis) -->
+    <nav class="nav-level-4" id="aiAnalyzeNav">
+        <div class="nav-container">
+            <div class="flex gap-6">
+                <button class="text-gray-600 hover:text-gray-900" onclick="showAIReports(this)">
+                    <i class="fas fa-star ai-icon"></i>
+                    AI Reports
+                </button>
+                <button class="text-gray-600 hover:text-gray-900" onclick="showHistoryReports(this)">History AI Reports</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- AI Analysis Poster -->
+        <div class="ai-analysis-poster" style="display: none;" id="aiAnalysisPoster">
+            <div class="poster-content">
+                <div class="poster-icon">
+                    <i class="fas fa-robot text-6xl text-blue-500"></i>
+                </div>
+                <h1 class="text-3xl font-bold mb-4">AI Error Analysis Report</h1>
+                <p class="text-xl text-gray-600 mb-8">Click to start analysis and let AI help you discover potential patterns</p>
+                <button onclick="startAIAnalysis()" class="start-analysis-btn">
+                    <i class="fas fa-play-circle mr-2"></i>
+                    Start Analysis
+                </button>
+            </div>
+        </div>
+        
+        <!-- Error Report List -->
+        <div class="error-list" id="errorList">
+            <div class="error-list-header">
+                <div>Error Description</div>
+                <div>Time</div>
+                <div>Department</div>
+                <div>Reporter</div>
+                <div>Status</div>
+                <div>Related Document</div>
+            </div>
+            <!-- Error items will be added here dynamically -->
+        </div>
+
+        <!-- AI Analysis Content -->
+        <div class="ai-analysis" id="aiAnalysis" style="display: none;">
+            <!-- 内容将通过JavaScript动态生成 -->
+        </div>
+    </main>
+
+    <!-- Send Modal -->
+    <div class="modal" id="sendModal">
+        <div class="modal-content">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-xl font-semibold">Send Report</h2>
+                <button onclick="closeSendModal()" class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Info</label>
+                <textarea class="form-input" rows="5" maxlength="5000" placeholder="Describe the issue..."></textarea>
+                <div class="hint">Please describe the issue you want to report</div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Send to...</label>
+                <div class="flex items-center">
+                    <span class="text-blue-500 mr-2">@</span>
+                    <input type="text" class="form-input" maxlength="1000" placeholder="Enter recipient name">
+                </div>
+                <div class="hint">Please enter the name of the recipient</div>
+            </div>
+            <div class="flex justify-end gap-4">
+                <button class="btn btn-secondary" onclick="closeSendModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="sendReport()">Send</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Sample error data
+        const errorData = [
+            {
+                description: "Search results not matching query expectations",
+                time: "2024-03-15 14:30",
+                department: "Marketing",
+                reporter: "John Smith",
+                status: "unread",
+                document: "Marketing Guidelines.pdf"
+            },
+            {
+                description: "Knowledge base missing recent policy updates",
+                time: "2024-03-15 11:20",
+                department: "Support",
+                reporter: "Emma Wilson",
+                status: "read",
+                document: "Policy Document.pdf"
+            },
+            {
+                description: "AI response contains outdated information",
+                time: "2024-03-14 16:45",
+                department: "Sales",
+                reporter: "Michael Brown",
+                status: "pending",
+                document: "Sales Playbook.pdf"
+            },
+            {
+                description: "Customer feedback form submission failed",
+                time: "2024-03-14 15:30",
+                department: "Customer Service",
+                reporter: "Sarah Johnson",
+                status: "resolved",
+                document: "Feedback Forms.pdf"
+            },
+            {
+                description: "Insurance claims process documentation incomplete",
+                time: "2024-03-14 13:15",
+                department: "Claims",
+                reporter: "David Lee",
+                status: "unread",
+                document: "Claims Process.pdf"
+            },
+            {
+                description: "Member benefits information inaccurate",
+                time: "2024-03-14 11:00",
+                department: "Benefits",
+                reporter: "Lisa Chen",
+                status: "pending",
+                document: "Member Benefits.pdf"
+            },
+            {
+                description: "Online booking system malfunction",
+                time: "2024-03-13 16:20",
+                department: "IT",
+                reporter: "Tom Wilson",
+                status: "read",
+                document: "Booking System.pdf"
+            },
+            {
+                description: "Drug coverage data errors",
+                time: "2024-03-13 14:45",
+                department: "Pharmacy",
+                reporter: "Rachel Green",
+                status: "unread",
+                document: "Drug Coverage.pdf"
+            },
+            {
+                description: "Provider directory update delayed",
+                time: "2024-03-13 10:30",
+                department: "Network",
+                reporter: "James Moore",
+                status: "pending",
+                document: "Provider Directory.pdf"
+            },
+            {
+                description: "Health plan comparison tool not working",
+                time: "2024-03-13 09:15",
+                department: "Products",
+                reporter: "Anna Wang",
+                status: "resolved",
+                document: "Plan Comparison.pdf"
+            }
+        ];
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            updateClock();
+            setInterval(updateClock, 1000);
+            renderErrorList();
+            initializeCharts();
+        });
+
+        // Clock update
+        function updateClock() {
+            const now = new Date();
+            document.getElementById('clock').textContent = now.toLocaleTimeString('en-US', {
+                hour: 'numeric',
+                minute: '2-digit'
+            });
+        }
+
+        // Render error list
+        function renderErrorList() {
+            const list = document.getElementById('errorList');
+            errorData.forEach(error => {
+                const item = document.createElement('div');
+                item.className = 'error-list-item';
+                item.innerHTML = `
+                    <div class="flex items-center">
+                        <input type="checkbox" class="error-select">
+                        <span>${error.description}</span>
+                    </div>
+                    <div>${error.time}</div>
+                    <div>${error.department}</div>
+                    <div>${error.reporter}</div>
+                    <div>
+                        <span class="status-badge status-${error.status}">
+                            ${error.status.charAt(0).toUpperCase() + error.status.slice(1)}
+                        </span>
+                    </div>
+                    <div>${error.document}</div>
+                `;
+                list.appendChild(item);
+            });
+        }
+
+        // Navigation functions
+        function updateNavStyles(clickedButton, navGroup) {
+            const buttons = navGroup.querySelectorAll('button');
+            buttons.forEach(btn => {
+                btn.className = 'text-gray-600 hover:text-gray-900';
+            });
+            clickedButton.className = 'text-blue-500 font-medium';
+        }
+
+        function showHumanReported(button) {
+            updateNavStyles(button, button.parentElement);
+            document.getElementById('humanReportedNav').style.display = 'block';
+            document.getElementById('errorList').style.display = 'block';
+            document.getElementById('aiAnalysis').style.display = 'none';
+            document.getElementById('aiAnalysisPoster').style.display = 'none';
+            document.getElementById('aiAnalyzeNav').style.display = 'none';
+            document.getElementById('manageNav').style.display = 'none';
+        }
+
+        function toggleManageReports(button) {
+            updateNavStyles(button, button.parentElement);
+            const manageNav = document.getElementById('manageNav');
+            const checkboxes = document.querySelectorAll('.error-select');
+            
+            if (manageNav.style.display === 'block') {
+                manageNav.style.display = 'none';
+                checkboxes.forEach(cb => cb.style.display = 'none');
+            } else {
+                manageNav.style.display = 'block';
+                checkboxes.forEach(cb => cb.style.display = 'block');
+            }
+        }
+
+        function showAIAnalyze(button) {
+            updateNavStyles(button, button.parentElement);
+            document.getElementById('aiAnalyzeNav').style.display = 'block';
+            document.getElementById('manageNav').style.display = 'none';
+            document.getElementById('errorList').style.display = 'none';
+            document.getElementById('aiAnalysis').style.display = 'none';
+            document.getElementById('aiAnalysisPoster').style.display = 'block';
+        }
+
+        function startAIAnalysis() {
+            document.getElementById('aiAnalysisPoster').style.display = 'none';
+            document.getElementById('aiAnalysis').style.display = 'block';
+            showAIReports();
+        }
+
+        function showAIReports(button) {
+            // 更新导航样式
+            updateNavStyles(button, button.parentElement);
+
+            const aiContent = `
+                <div class="ai-reports p-6">
+                    <div class="grid grid-cols-2 gap-8 mb-8">
+                        <div class="stat-card bg-white p-6 rounded-lg shadow">
+                            <h3 class="text-xl font-semibold mb-4">Error Type Distribution</h3>
+                            <div class="space-y-4">
+                                <div class="flex items-center justify-between">
+                                    <span>Search Related</span>
+                                    <div class="flex items-center">
+                                        <div class="w-32 bg-gray-200 rounded-full h-2.5">
+                                            <div class="bg-blue-500 h-2.5 rounded-full" style="width: 35%"></div>
+                                        </div>
+                                        <span class="ml-2">35%</span>
+                                    </div>
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <span>Content Updates</span>
+                                    <div class="flex items-center">
+                                        <div class="w-32 bg-gray-200 rounded-full h-2.5">
+                                            <div class="bg-blue-500 h-2.5 rounded-full" style="width: 25%"></div>
+                                        </div>
+                                        <span class="ml-2">25%</span>
+                                    </div>
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <span>System Response</span>
+                                    <div class="flex items-center">
+                                        <div class="w-32 bg-gray-200 rounded-full h-2.5">
+                                            <div class="bg-blue-500 h-2.5 rounded-full" style="width: 20%"></div>
+                                        </div>
+                                        <span class="ml-2">20%</span>
+                                    </div>
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <span>Others</span>
+                                    <div class="flex items-center">
+                                        <div class="w-32 bg-gray-200 rounded-full h-2.5">
+                                            <div class="bg-blue-500 h-2.5 rounded-full" style="width: 20%"></div>
+                                        </div>
+                                        <span class="ml-2">20%</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="stat-card bg-white p-6 rounded-lg shadow">
+                            <h3 class="text-xl font-semibold mb-4">Department Distribution</h3>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div class="stat-item text-center p-4 rounded-lg bg-blue-50">
+                                    <div class="text-2xl font-bold text-blue-500">40%</div>
+                                    <div class="text-sm text-gray-600">Marketing</div>
+                                </div>
+                                <div class="stat-item text-center p-4 rounded-lg bg-purple-50">
+                                    <div class="text-2xl font-bold text-purple-500">30%</div>
+                                    <div class="text-sm text-gray-600">Sales</div>
+                                </div>
+                                <div class="stat-item text-center p-4 rounded-lg bg-orange-50">
+                                    <div class="text-2xl font-bold text-orange-500">20%</div>
+                                    <div class="text-sm text-gray-600">Customer Service</div>
+                                </div>
+                                <div class="stat-item text-center p-4 rounded-lg bg-green-50">
+                                    <div class="text-2xl font-bold text-green-500">10%</div>
+                                    <div class="text-sm text-gray-600">Technical</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="trend-analysis mb-8 bg-white p-6 rounded-lg shadow">
+                        <h3 class="text-xl font-semibold mb-4">Trend Analysis</h3>
+                        <div class="relative h-48">
+                            <div class="absolute bottom-0 left-0 right-0 h-40 flex items-end justify-between px-4">
+                                <div class="trend-bar" style="height: 65%; background: #007AFF;" title="Jan: 65">
+                                    <div class="text-xs mt-2">Jan</div>
+                                </div>
+                                <div class="trend-bar" style="height: 59%; background: #007AFF;" title="Feb: 59">
+                                    <div class="text-xs mt-2">Feb</div>
+                                </div>
+                                <div class="trend-bar" style="height: 80%; background: #007AFF;" title="Mar: 80">
+                                    <div class="text-xs mt-2">Mar</div>
+                                </div>
+                                <div class="trend-bar" style="height: 81%; background: #007AFF;" title="Apr: 81">
+                                    <div class="text-xs mt-2">Apr</div>
+                                </div>
+                                <div class="trend-bar" style="height: 56%; background: #007AFF;" title="May: 56">
+                                    <div class="text-xs mt-2">May</div>
+                                </div>
+                                <div class="trend-bar" style="height: 40%; background: #007AFF;" title="Jun: 40">
+                                    <div class="text-xs mt-2">Jun</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="key-findings bg-white p-6 rounded-lg shadow">
+                        <h3 class="text-xl font-semibold mb-4">Key Findings</h3>
+                        <ul class="list-disc ml-6 space-y-2">
+                            <li>Search-related errors account for 35%, the main source of issues</li>
+                            <li>Marketing department reports the highest number of issues at 40%</li>
+                            <li>Error reporting peaks correlate with new document uploads</li>
+                            <li>90% of errors receive response within 24 hours</li>
+                            <li>Recurring issues mainly focus on document updates and search accuracy</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="recommendations mt-8">
+                        <h3 class="text-xl font-semibold mb-4">AI Recommendations</h3>
+                        <div class="grid grid-cols-3 gap-6">
+                            <div class="rec-card">
+                                <i class="fas fa-search text-2xl text-blue-500 mb-2"></i>
+                                <h4 class="font-medium mb-2">Optimize Search Algorithm</h4>
+                                <p>Improve search relevance and add synonym support</p>
+                            </div>
+                            <div class="rec-card">
+                                <i class="fas fa-clock text-2xl text-green-500 mb-2"></i>
+                                <h4 class="font-medium mb-2">Automatic Updates</h4>
+                                <p>Implement document auto-update notification system</p>
+                            </div>
+                            <div class="rec-card">
+                                <i class="fas fa-users text-2xl text-purple-500 mb-2"></i>
+                                <h4 class="font-medium mb-2">Department Collaboration</h4>
+                                <p>Enhance communication between Marketing and other departments</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('aiAnalysis').innerHTML = aiContent;
+        }
+
+        function showHistoryReports(button) {
+            // 更新导航样式
+            updateNavStyles(button, button.parentElement);
+            
+            const historyContent = `
+                <div class="history-reports p-6">
+                    <div class="filters mb-6">
+                        <div class="flex gap-4 items-center">
+                            <div class="date-range">
+                                <label class="mr-2">Date Range:</label>
+                                <select class="form-select">
+                                    <option>Last 7 days</option>
+                                    <option>Last 30 days</option>
+                                    <option>Last 3 months</option>
+                                </select>
+                            </div>
+                            <div class="department-filter">
+                                <label class="mr-2">Department:</label>
+                                <select class="form-select">
+                                    <option>All</option>
+                                    <option>Marketing</option>
+                                    <option>Sales</option>
+                                    <option>Customer Service</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="history-list">
+                        <div class="grid grid-cols-1 gap-4">
+                            ${generateHistoryItems()}
+                        </div>
+                    </div>
+                    
+                    <div class="pagination mt-6 flex justify-center gap-2">
+                        <button class="px-4 py-2 rounded bg-gray-100">&lt;</button>
+                        <button class="px-4 py-2 rounded bg-blue-500 text-white">1</button>
+                        <button class="px-4 py-2 rounded bg-gray-100">2</button>
+                        <button class="px-4 py-2 rounded bg-gray-100">3</button>
+                        <button class="px-4 py-2 rounded bg-gray-100">&gt;</button>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('aiAnalysis').innerHTML = historyContent;
+        }
+
+        function generateHistoryItems() {
+            const historyData = [
+                {
+                    date: "2024-03-01",
+                    title: "Q1 Error Analysis Report",
+                    findings: "Search accuracy improved by 15%",
+                    status: "Completed"
+                },
+                {
+                    date: "2024-02-15",
+                    title: "Document Update Efficiency Analysis",
+                    findings: "Update time reduced by 30%",
+                    status: "Archived"
+                },
+                {
+                    date: "2024-02-01",
+                    title: "User Feedback Analysis Report",
+                    findings: "Satisfaction increased by 20%",
+                    status: "Completed"
+                },
+                {
+                    date: "2024-01-15",
+                    title: "System Performance Optimization Report",
+                    findings: "Response time decreased by 40%",
+                    status: "Archived"
+                }
+            ];
+            
+            return historyData.map(item => `
+                <div class="history-item bg-white p-4 rounded-lg shadow hover:shadow-md transition-shadow">
+                    <div class="flex justify-between items-center">
+                        <div class="flex items-center gap-4">
+                            <div class="text-gray-500">${item.date}</div>
+                            <div class="font-medium">${item.title}</div>
+                        </div>
+                        <div class="status-badge status-${item.status === 'Completed' ? 'resolved' : 'read'}">
+                            ${item.status}
+                        </div>
+                    </div>
+                    <div class="mt-2 text-gray-600">
+                        <i class="fas fa-chart-line mr-2"></i>
+                        ${item.findings}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function initializeAllCharts() {
+            // Error Type Chart
+            const errorTypeChart = new Chart(document.getElementById('errorTypeChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['Search Related', 'Content Updates', 'System Response', 'Others'],
+                    datasets: [{
+                        label: 'Error Type Distribution',
+                        data: [35, 25, 20, 20],
+                        backgroundColor: '#007AFF'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    animation: {
+                        duration: 0 // 禁用动画
+                    }
+                }
+            });
+            document.getElementById('errorTypeChart').chart = errorTypeChart;
+
+            // Department Distribution Chart
+            const deptChart = new Chart(document.getElementById('departmentChart'), {
+                type: 'pie',
+                data: {
+                    labels: ['Marketing', 'Sales', 'Customer Service', 'Technical'],
+                    datasets: [{
+                        data: [40, 30, 20, 10],
+                        backgroundColor: ['#007AFF', '#5856D6', '#FF9500', '#34C759']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    animation: {
+                        duration: 0 // 禁用动画
+                    }
+                }
+            });
+            document.getElementById('departmentChart').chart = deptChart;
+
+            // Trend Analysis Chart
+            const trendChart = new Chart(document.getElementById('trendChart'), {
+                type: 'line',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                    datasets: [{
+                        label: 'Number of Error Reports',
+                        data: [65, 59, 80, 81, 56, 40],
+                        borderColor: '#007AFF',
+                        tension: 0.1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    animation: {
+                        duration: 0 // 禁用动画
+                    }
+                }
+            });
+            document.getElementById('trendChart').chart = trendChart;
+        }
+
+        // Modal functions
+        function showSendModal() {
+            document.getElementById('sendModal').style.display = 'flex';
+        }
+
+        function closeSendModal() {
+            document.getElementById('sendModal').style.display = 'none';
+        }
+
+        // Selection functions
+        function selectAll() {
+            document.querySelectorAll('.error-select').forEach(cb => cb.checked = true);
+        }
+
+        function deselectAll() {
+            document.querySelectorAll('.error-select').forEach(cb => cb.checked = false);
+        }
+
+        function sendReport() {
+            // Implement send logic here
+            closeSendModal();
+            alert('Report sent successfully');
+        }
+    </script>
+</body>
+</html> 

@@ -1,0 +1,907 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medibank Knowledge Base - Document Management</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --primary-color: #007AFF;
+            --primary-hover: #0056b3;
+            --secondary-color: #5856D6;
+            --success-color: #34C759;
+            --warning-color: #FF9500;
+            --error-color: #FF3B30;
+            --text-primary: #000000;
+            --text-secondary: #6e6e73;
+            --background-primary: #ffffff;
+            --background-secondary: #f5f5f7;
+            --border-color: #e5e5e7;
+            --card-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* MacOS Status Bar */
+        .macos-status-bar {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border-color);
+            height: 28px;
+            display: flex;
+            align-items: center;
+            padding: 0 12px;
+            font-size: 13px;
+            color: var(--text-primary);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+        }
+
+        .macos-status-bar .left {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .macos-status-bar .right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        /* App Navigation */
+        .app-nav {
+            background: var(--background-primary);
+            border-bottom: 1px solid var(--border-color);
+            padding: 12px 24px;
+            display: flex;
+            align-items: center;
+            gap: 24px;
+            position: fixed;
+            top: 28px;
+            left: 0;
+            right: 0;
+            z-index: 999;
+        }
+
+        .app-nav .logo {
+            font-weight: 600;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .app-nav .nav-items {
+            display: flex;
+            gap: 24px;
+            flex: 1;
+        }
+
+        .app-nav .nav-actions {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .nav-item {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 14px;
+            padding: 6px 12px;
+            border-radius: 6px;
+            transition: all 0.2s;
+        }
+
+        .nav-item:hover {
+            background: var(--background-secondary);
+            color: var(--text-primary);
+        }
+
+        .nav-item.active {
+            background: var(--background-secondary);
+            color: var(--primary-color);
+            font-weight: 500;
+        }
+
+        /* Secondary Navigation */
+        .secondary-nav {
+            background: var(--background-secondary);
+            padding: 12px 24px;
+            position: fixed;
+            top: 84px;
+            left: 0;
+            right: 0;
+            z-index: 998;
+            border-bottom: 1px solid var(--border-color);
+            display: none;
+        }
+
+        .secondary-nav.visible {
+            display: block;
+        }
+
+        /* Document Management Actions */
+        .management-actions-nav {
+            background: var(--background-primary);
+            padding: 16px 24px;
+            position: fixed;
+            top: 140px;
+            left: 0;
+            right: 0;
+            z-index: 997;
+            border-bottom: 1px solid var(--border-color);
+            display: none;
+        }
+
+        .management-actions-nav.visible {
+            display: block;
+        }
+
+        .management-actions-container {
+            max-width: 1440px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* Main Content Adjustment */
+        .main-content {
+            max-width: 1440px;
+            margin: 0 auto;
+            padding: 200px 32px 32px;
+            min-height: 100vh;
+            background: var(--background-secondary);
+        }
+
+        /* Document Management */
+        .management-header {
+            background: var(--background-primary);
+            border-radius: 12px;
+            padding: 16px 24px;
+            margin-bottom: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: var(--card-shadow);
+        }
+
+        .management-actions {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        /* Document List */
+        .document-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 24px;
+            margin-top: 24px;
+        }
+
+        .document-card {
+            background: var(--background-primary);
+            border-radius: 12px;
+            padding: 20px;
+            position: relative;
+            transition: all 0.2s;
+            box-shadow: var(--card-shadow);
+        }
+
+        .document-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        /* Document Selection */
+        .document-select {
+            position: absolute;
+            top: 16px;
+            left: 16px;
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.2s;
+            appearance: none;
+            -webkit-appearance: none;
+            border: 2px solid var(--border-color);
+            border-radius: 50%;
+            background: white;
+        }
+
+        .document-select:checked {
+            background: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+        .document-select:checked::after {
+            content: '✓';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 14px;
+        }
+
+        .document-card:hover .document-select {
+            opacity: 1;
+        }
+
+        .document-card.selected .document-select {
+            opacity: 1;
+        }
+
+        .document-icon {
+            width: 48px;
+            height: 48px;
+            background: rgba(0, 122, 255, 0.05);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 16px;
+        }
+
+        .document-title {
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: var(--text-primary);
+        }
+
+        .document-meta {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-hover);
+        }
+
+        .btn-secondary {
+            background: var(--background-secondary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            background: var(--background-primary);
+            border-color: var(--text-secondary);
+        }
+
+        .btn-danger {
+            background: var(--error-color);
+            color: white;
+            border: none;
+        }
+
+        .btn-danger:hover {
+            background: #cc2f26;
+        }
+
+        .btn-disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Modals */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(5px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: var(--background-primary);
+            border-radius: 16px;
+            padding: 24px;
+            width: 90%;
+            max-width: 480px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--text-secondary);
+            font-size: 20px;
+        }
+
+        .modal-close:hover {
+            color: var(--text-primary);
+        }
+
+        /* Form Elements */
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .form-select {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background: var(--background-primary);
+            color: var(--text-primary);
+            font-size: 14px;
+        }
+
+        .form-select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        /* Error Message */
+        .error-message {
+            color: var(--error-color);
+            font-size: 12px;
+            margin-top: 4px;
+            display: none;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 48px;
+            background: var(--background-primary);
+            border-radius: 12px;
+            margin-top: 24px;
+        }
+
+        .empty-state-icon {
+            font-size: 48px;
+            color: var(--text-secondary);
+            margin-bottom: 16px;
+        }
+
+        /* Animations */
+        @keyframes slideIn {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .animate-slide-in {
+            animation: slideIn 0.3s ease forwards;
+        }
+
+        /* Document Card Edit Button */
+        .document-edit-btn {
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.2s ease;
+        }
+
+        .document-edit-btn.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- MacOS Status Bar -->
+    <div class="macos-status-bar">
+        <div class="left">
+            <span><i class="fab fa-apple"></i></span>
+            <span>Medibank Knowledge Base</span>
+            <span>File</span>
+            <span>Edit</span>
+            <span>View</span>
+            <span>Help</span>
+        </div>
+        <div class="right">
+            <span><i class="fas fa-wifi"></i></span>
+            <span><i class="fas fa-battery-full"></i></span>
+            <span id="clock">12:00 PM</span>
+        </div>
+    </div>
+
+    <!-- App Navigation (1st level) -->
+    <nav class="app-nav">
+        <div class="logo">
+            <i class="fas fa-book-medical"></i>
+            <span>Medibank KB</span>
+        </div>
+        <div class="nav-items">
+            <a href="#" class="nav-item active">Knowledge Base</a>
+            <a href="#" class="nav-item">Analytics</a>
+            <a href="#" class="nav-item">Settings</a>
+        </div>
+    </nav>
+
+    <!-- Secondary Navigation (2nd level) -->
+    <nav class="secondary-nav">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <div class="flex items-center gap-4">
+                <h2 class="text-lg font-semibold">Marketing Knowledge Base</h2>
+            </div>
+            <div class="flex items-center gap-4">
+                <button id="manageDocsBtn" class="btn btn-primary" disabled>
+                    <i class="fas fa-folder"></i>
+                    Manage Documents
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Management Actions Navigation (3rd level) -->
+    <nav class="management-actions-nav">
+        <div class="management-actions-container">
+            <div class="management-actions">
+                <button id="selectAllBtn" class="btn btn-secondary">
+                    <i class="fas fa-check-square"></i>
+                    Select All
+                </button>
+                <button id="deselectAllBtn" class="btn btn-secondary">
+                    <i class="fas fa-square"></i>
+                    Deselect All
+                </button>
+            </div>
+            <div class="management-actions">
+                <button id="moveBtn" class="btn btn-secondary" disabled>
+                    <i class="fas fa-folder-open"></i>
+                    Move
+                </button>
+                <button id="deleteBtn" class="btn btn-secondary" disabled>
+                    <i class="fas fa-trash"></i>
+                    Delete
+                </button>
+                <button id="downloadBtn" class="btn btn-secondary" disabled>
+                    <i class="fas fa-download"></i>
+                    Download
+                </button>
+                <button id="saveBtn" class="btn btn-primary">
+                    <i class="fas fa-save"></i>
+                    Save Changes
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Empty State -->
+        <div id="emptyState" class="empty-state">
+            <i class="fas fa-folder-open empty-state-icon"></i>
+            <h2 class="text-xl font-semibold mb-2">No Documents Yet</h2>
+            <p class="text-gray-600 mb-4">Start by uploading your first document to the knowledge base</p>
+            <button class="btn btn-primary" onclick="window.location.href='document-upload.html'">
+                <i class="fas fa-upload"></i>
+                Upload Document
+            </button>
+        </div>
+
+        <!-- Document Grid -->
+        <div id="documentGrid" class="document-grid" style="display: none;">
+            <!-- Document cards will be added here dynamically -->
+        </div>
+    </main>
+
+    <!-- Move Modal -->
+    <div id="moveModal" class="modal">
+        <div class="modal-content animate-slide-in">
+            <div class="modal-header">
+                <h2 class="text-xl font-semibold">Move Documents</h2>
+                <button class="modal-close" onclick="closeMoveModal()">×</button>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Department</label>
+                <select class="form-select" id="departmentSelect">
+                    <option value="">Select Department</option>
+                    <option value="marketing">Marketing</option>
+                    <option value="sales">Sales</option>
+                    <option value="support">Customer Support</option>
+                    <option value="hr">Human Resources</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Knowledge Base</label>
+                <select class="form-select" id="kbSelect">
+                    <option value="">Select Knowledge Base</option>
+                </select>
+            </div>
+            <div class="flex justify-end gap-4 mt-6">
+                <button class="btn btn-secondary" onclick="closeMoveModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="moveDocuments()">Move</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Modal -->
+    <div id="deleteModal" class="modal">
+        <div class="modal-content animate-slide-in">
+            <div class="modal-header">
+                <h2 class="text-xl font-semibold">Delete Documents</h2>
+                <button class="modal-close" onclick="closeDeleteModal()">×</button>
+            </div>
+            <p class="mb-2">Are you sure you want to delete the selected documents?</p>
+            <p class="text-sm text-gray-500 mb-6">Documents cannot be recovered after 30 days.</p>
+            <div class="flex justify-end gap-4">
+                <button class="btn btn-secondary" onclick="closeDeleteModal()">Cancel</button>
+                <button class="btn btn-danger" onclick="deleteDocuments()">Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Save Changes Modal -->
+    <div id="saveModal" class="modal">
+        <div class="modal-content animate-slide-in">
+            <div class="modal-header">
+                <h2 class="text-xl font-semibold">Save Changes</h2>
+                <button class="modal-close" onclick="closeSaveModal()">×</button>
+            </div>
+            <p class="mb-2">Are you sure you want to save all changes?</p>
+            <p class="text-sm text-gray-500 mb-6">Changes cannot be undone after 30 days.</p>
+            <div class="flex justify-end gap-4">
+                <button class="btn btn-secondary" onclick="closeSaveModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="saveChanges()">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Sample data for demonstration
+        const sampleDocuments = [
+            {
+                id: 1,
+                title: "Marketing Strategy 2024.pdf",
+                date: "2024-03-15",
+                author: "John Smith",
+                type: "PDF",
+                department: "marketing",
+                knowledgeBase: "product-marketing"
+            },
+            {
+                id: 2,
+                title: "Customer Feedback Analysis.docx",
+                date: "2024-03-14",
+                author: "Emma Wilson",
+                type: "Word",
+                department: "support",
+                knowledgeBase: "customer-feedback"
+            },
+            {
+                id: 3,
+                title: "Product Launch Plan.pptx",
+                date: "2024-03-13",
+                author: "Michael Brown",
+                type: "PowerPoint",
+                department: "marketing",
+                knowledgeBase: "campaign-archives"
+            }
+        ];
+
+        let currentDocuments = [...sampleDocuments];
+
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', function() {
+            updateClock();
+            setInterval(updateClock, 1000);
+            
+            const manageDocsBtn = document.getElementById('manageDocsBtn');
+            const secondaryNav = document.querySelector('.secondary-nav');
+            const managementActionsNav = document.querySelector('.management-actions-nav');
+            
+            // Show secondary navigation
+            secondaryNav.classList.add('visible');
+            
+            // Enable/disable manage documents button based on document count
+            manageDocsBtn.disabled = currentDocuments.length === 0;
+            
+            if (currentDocuments.length > 0) {
+                document.getElementById('emptyState').style.display = 'none';
+                document.getElementById('documentGrid').style.display = 'grid';
+                renderDocuments();
+            }
+
+            // Add click handler for manage documents button
+            manageDocsBtn.addEventListener('click', function() {
+                this.classList.toggle('active');
+                managementActionsNav.classList.toggle('visible');
+                
+                // Update the button text based on state
+                const isManaging = this.classList.contains('active');
+                this.innerHTML = isManaging ? 
+                    '<i class="fas fa-times"></i> Exit Management' :
+                    '<i class="fas fa-folder"></i> Manage Documents';
+                
+                // Show/hide document checkboxes and edit buttons
+                const checkboxes = document.querySelectorAll('.document-select');
+                const editButtons = document.querySelectorAll('.document-edit-btn');
+                
+                checkboxes.forEach(checkbox => {
+                    checkbox.style.opacity = isManaging ? '1' : '0';
+                });
+                
+                editButtons.forEach(button => {
+                    if (isManaging) {
+                        button.classList.add('visible');
+                    } else {
+                        button.classList.remove('visible');
+                        // If there's any ongoing edit, cancel it
+                        const card = button.closest('.document-card');
+                        const titleElement = card.querySelector('.document-title');
+                        if (titleElement.querySelector('input')) {
+                            cancelDocumentEdit(button, titleElement.dataset.originalTitle);
+                        }
+                    }
+                });
+            });
+        });
+
+        // Update clock
+        function updateClock() {
+            const now = new Date();
+            document.getElementById('clock').textContent = now.toLocaleTimeString('en-US', {
+                hour: 'numeric',
+                minute: '2-digit'
+            });
+        }
+
+        // Render documents
+        function renderDocuments() {
+            const grid = document.getElementById('documentGrid');
+            grid.innerHTML = '';
+
+            currentDocuments.forEach(doc => {
+                const card = createDocumentCard(doc);
+                grid.appendChild(card);
+            });
+        }
+
+        // Create document card with improved selection
+        function createDocumentCard(doc) {
+            const card = document.createElement('div');
+            card.className = 'document-card';
+            card.dataset.docId = doc.id;
+            card.innerHTML = `
+                <input type="checkbox" class="document-select" onchange="handleDocumentSelect()">
+                <div class="document-icon">
+                    <i class="fas fa-file-alt text-blue-500"></i>
+                </div>
+                <div class="document-title">${doc.title}</div>
+                <div class="document-meta">
+                    <div class="mb-1">Created: ${doc.date}</div>
+                    <div>Author: ${doc.author}</div>
+                    <div class="mt-1 text-xs">Department: ${doc.department}</div>
+                </div>
+                <div class="flex justify-end mt-4">
+                    <button class="btn btn-secondary btn-sm document-edit-btn" onclick="editDocument(this)">
+                        <i class="fas fa-edit"></i>
+                        Edit
+                    </button>
+                </div>
+            `;
+            return card;
+        }
+
+        // Handle document selection
+        function handleDocumentSelect() {
+            const selectedCount = document.querySelectorAll('.document-select:checked').length;
+            const totalCount = document.querySelectorAll('.document-select').length;
+            
+            document.getElementById('moveBtn').disabled = selectedCount === 0;
+            document.getElementById('deleteBtn').disabled = selectedCount === 0;
+            document.getElementById('downloadBtn').disabled = selectedCount === 0;
+            
+            document.getElementById('selectAllBtn').style.display = selectedCount === totalCount ? 'none' : 'inline-flex';
+            document.getElementById('deselectAllBtn').style.display = selectedCount === totalCount ? 'inline-flex' : 'none';
+        }
+
+        // Select/Deselect all documents
+        function selectAllDocuments() {
+            document.querySelectorAll('.document-select').forEach(checkbox => {
+                checkbox.checked = true;
+            });
+            handleDocumentSelect();
+        }
+
+        function deselectAllDocuments() {
+            document.querySelectorAll('.document-select').forEach(checkbox => {
+                checkbox.checked = false;
+            });
+            handleDocumentSelect();
+        }
+
+        // Modal functions
+        function showMoveModal() {
+            document.getElementById('moveModal').style.display = 'flex';
+        }
+
+        function closeMoveModal() {
+            document.getElementById('moveModal').style.display = 'none';
+        }
+
+        function showDeleteModal() {
+            document.getElementById('deleteModal').style.display = 'flex';
+        }
+
+        function closeDeleteModal() {
+            document.getElementById('deleteModal').style.display = 'none';
+        }
+
+        function showSaveModal() {
+            document.getElementById('saveModal').style.display = 'flex';
+        }
+
+        function closeSaveModal() {
+            document.getElementById('saveModal').style.display = 'none';
+        }
+
+        // Button click handlers
+        document.getElementById('selectAllBtn').addEventListener('click', selectAllDocuments);
+        document.getElementById('deselectAllBtn').addEventListener('click', deselectAllDocuments);
+        document.getElementById('moveBtn').addEventListener('click', showMoveModal);
+        document.getElementById('deleteBtn').addEventListener('click', showDeleteModal);
+        document.getElementById('saveBtn').addEventListener('click', showSaveModal);
+
+        // Department select handler
+        document.getElementById('departmentSelect').addEventListener('change', function(e) {
+            const kbSelect = document.getElementById('kbSelect');
+            kbSelect.innerHTML = '<option value="">Select Knowledge Base</option>';
+            
+            if (e.target.value) {
+                // Sample knowledge bases for each department
+                const kbs = {
+                    marketing: ['Product Marketing', 'Brand Guidelines', 'Campaign Archives'],
+                    sales: ['Sales Playbooks', 'Customer Stories', 'Pricing Guidelines'],
+                    support: ['Technical Documentation', 'FAQs', 'Troubleshooting Guides'],
+                    hr: ['Employee Handbook', 'Policies', 'Training Materials']
+                };
+                
+                kbs[e.target.value].forEach(kb => {
+                    const option = document.createElement('option');
+                    option.value = kb.toLowerCase().replace(/\s+/g, '-');
+                    option.textContent = kb;
+                    kbSelect.appendChild(option);
+                });
+            }
+        });
+
+        // Move documents functionality
+        function moveDocuments() {
+            const selectedDepartment = document.getElementById('departmentSelect').value;
+            const selectedKB = document.getElementById('kbSelect').value;
+            
+            if (!selectedDepartment || !selectedKB) {
+                showNotification('Please select both department and knowledge base');
+                return;
+            }
+
+            const selectedDocs = Array.from(document.querySelectorAll('.document-select:checked')).map(checkbox => {
+                const card = checkbox.closest('.document-card');
+                return card.dataset.docId;
+            });
+
+            // Remove selected documents from current list
+            currentDocuments = currentDocuments.filter(doc => !selectedDocs.includes(doc.id.toString()));
+            
+            // Update UI
+            renderDocuments();
+            closeMoveModal();
+            
+            // Reset selection state
+            document.getElementById('moveBtn').disabled = true;
+            document.getElementById('deleteBtn').disabled = true;
+            document.getElementById('downloadBtn').disabled = true;
+            
+            showNotification(`Documents moved to ${selectedDepartment}/${selectedKB} successfully`);
+        }
+
+        function deleteDocuments() {
+            // Implement delete logic here
+            closeDeleteModal();
+            showNotification('Documents deleted successfully');
+        }
+
+        function saveChanges() {
+            // Implement save logic here
+            closeSaveModal();
+            showNotification('Changes saved successfully');
+        }
+
+        function editDocument(button) {
+            const card = button.closest('.document-card');
+            const titleElement = card.querySelector('.document-title');
+            const originalTitle = titleElement.textContent;
+            
+            titleElement.innerHTML = `
+                <input type="text" class="w-full p-2 border rounded" value="${originalTitle}">
+                <div class="error-message">Invalid file name. Please use only letters, numbers, underscores (_), hyphens (-), and dots (.). Do not include spaces or special characters.</div>
+                <div class="flex gap-2 mt-2">
+                    <button class="btn btn-primary btn-sm" onclick="saveDocumentTitle(this)">Save</button>
+                    <button class="btn btn-secondary btn-sm" onclick="cancelDocumentEdit(this, '${originalTitle}')">Cancel</button>
+                </div>
+            `;
+            
+            const input = titleElement.querySelector('input');
+            input.focus();
+            input.addEventListener('input', validateFileName);
+        }
+
+        function validateFileName(e) {
+            const input = e.target;
+            const errorMessage = input.parentElement.querySelector('.error-message');
+            const saveButton = input.parentElement.querySelector('.btn-primary');
+            
+            const isValid = /^[a-zA-Z0-9._-]+$/.test(input.value);
+            errorMessage.style.display = isValid ? 'none' : 'block';
+            saveButton.disabled = !isValid;
+        }
+
+        function saveDocumentTitle(button) {
+            const titleElement = button.closest('.document-title');
+            const input = titleElement.querySelector('input');
+            titleElement.textContent = input.value;
+        }
+
+        function cancelDocumentEdit(button, originalTitle) {
+            const titleElement = button.closest('.document-title');
+            titleElement.textContent = originalTitle;
+        }
+
+        function showNotification(message) {
+            // Implement notification logic here
+            alert(message);
+        }
+    </script>
+</body>
+</html> 
